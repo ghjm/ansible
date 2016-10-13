@@ -26,6 +26,7 @@ import cmd
 import getpass
 import os
 import sys
+import json
 
 from ansible import constants as C
 from ansible.cli import CLI
@@ -111,14 +112,13 @@ class InventoryCLI(CLI, cmd.Cmd):
         results['_meta']['hostvars'] = {}
 
         for host in hosts:
-            results['_meta']['hostvars'][host] = host.vars
+            results['_meta']['hostvars'][host.name] = host.vars
             for hg in [x.name for x in host.groups]:
                 if hg not in results:
                     results[hg] = {}
                     results[hg]['hosts'] = []
                     results[hg]['vars'] = self.inventory.groups[hg].vars
-                if host not in results[hg]['hosts']:
-                    results[hg]['hosts'].append(host)
-
-        from pprint import pprint
-        pprint(results)
+                if host.name not in results[hg]['hosts']:
+                    results[hg]['hosts'].append(host.name)
+        
+        print(json.dumps(results))
